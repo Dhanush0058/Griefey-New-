@@ -1,0 +1,8 @@
+{
+  "name": "GrievanceRedressal",
+  "description": "A mobile-first application for citizens to report grievances through text, voice, or images. It features automatic department routing, real-time status tracking, offline capabilities, and multilingual support to ensure a seamless and efficient complaint resolution process.",
+  "requestFramePermissions": [
+    "geolocation",
+    "microphone"
+  ]
+}
