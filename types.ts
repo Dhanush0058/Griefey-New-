@@ -43,6 +43,7 @@ export interface Complaint {
   escalation_level: number;
   escalation_due: Timestamp;
   upvotedBy: string[];
+  isAnonymous?: boolean;
 }
 
 export interface Draft {

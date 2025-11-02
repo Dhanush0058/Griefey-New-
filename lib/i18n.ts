@@ -8,6 +8,7 @@ export const translations = {
     logout: "Logout",
     welcome: "Welcome",
     myTickets: "My Complaints",
+    dashboard: "Dashboard",
     newGrievance: "New Complaint",
     submitGrievance: "Submit Complaint",
     describeYourGrievance: "Describe your complaint...",
@@ -112,6 +113,14 @@ export const translations = {
     recording: "Recording...",
     voiceInputNotSupported: "Voice input is not supported by your browser.",
     micPermissionDenied: "Microphone permission denied.",
+    submitAnonymously: "Submit Anonymously",
+    aiSuggestion: "AI has suggested a title and category from your image.",
+    analyzingImage: "Analyzing image...",
+    officialUpdates: "Official Updates",
+    publicComments: "Public Comments",
+    addComment: "Add a comment",
+    noUpdates: "No official updates have been posted yet.",
+    noComments: "Be the first to comment."
   },
   es: {
     loginTitle: "Portal de Quejas",
@@ -122,6 +131,7 @@ export const translations = {
     logout: "Cerrar Sesión",
     welcome: "Bienvenido",
     myTickets: "Mis Quejas",
+    dashboard: "Tablero",
     newGrievance: "Nueva Queja",
     submitGrievance: "Enviar Queja",
     describeYourGrievance: "Describa su queja...",
@@ -226,6 +236,14 @@ export const translations = {
     recording: "Grabando...",
     voiceInputNotSupported: "La entrada de voz no es compatible con su navegador.",
     micPermissionDenied: "Permiso de micrófono denegado.",
+    submitAnonymously: "Enviar de Forma Anónima",
+    aiSuggestion: "La IA ha sugerido un título y una categoría a partir de tu imagen.",
+    analyzingImage: "Analizando imagen...",
+    officialUpdates: "Actualizaciones Oficiales",
+    publicComments: "Comentarios Públicos",
+    addComment: "Añadir un comentario",
+    noUpdates: "Aún no se han publicado actualizaciones oficiales.",
+    noComments: "Sé el primero en comentar."
   },
   hi: {
     loginTitle: "शिकायत पोर्टल",
@@ -236,6 +254,7 @@ export const translations = {
     logout: "लॉग आउट",
     welcome: "स्वागत है",
     myTickets: "मेरी शिकायतें",
+    dashboard: "डैशबोर्ड",
     newGrievance: "नई शिकायत",
     submitGrievance: "शिकायत दर्ज करें",
     describeYourGrievance: "अपनी शिकायत का वर्णन करें...",
@@ -337,5 +356,13 @@ export const translations = {
     recording: "रिकॉर्डिंग...",
     voiceInputNotSupported: "आपके ब्राउज़र द्वारा वॉयस इनपुट समर्थित नहीं है।",
     micPermissionDenied: "माइक्रोफ़ोन की अनुमति अस्वीकृत।",
+    submitAnonymously: "गुमनाम रूप से सबमिट करें",
+    aiSuggestion: "एआई ने आपकी छवि से एक शीर्षक और श्रेणी का सुझाव दिया है।",
+    analyzingImage: "छवि का विश्लेषण हो रहा है...",
+    officialUpdates: "आधिकारिक अपडेट",
+    publicComments: "सार्वजनिक टिप्पणियाँ",
+    addComment: "एक टिप्पणी जोड़ें",
+    noUpdates: "अभी तक कोई आधिकारिक अपडेट पोस्ट नहीं किया गया है।",
+    noComments: "टिप्पणी करने वाले पहले व्यक्ति बनें।"
   }
 };

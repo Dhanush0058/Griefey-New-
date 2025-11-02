@@ -3,7 +3,8 @@ import useLocalization from '../hooks/useLocalization';
 import { Draft } from '../types';
 
 interface DraftsProps {
-  setView: (view: 'submit' | 'tickets' | 'drafts') => void;
+  // Fix: Aligned the view types with the main App's View type.
+  setView: (view: 'submit' | 'dashboard' | 'drafts' | 'nearby') => void;
   onEditDraft: (draft: Draft) => void;
 }
 

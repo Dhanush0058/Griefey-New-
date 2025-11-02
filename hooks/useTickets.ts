@@ -18,7 +18,7 @@ import { ref, uploadBytesResumable, getDownloadURL, type UploadTaskSnapshot } fr
 import type { Complaint, ComplaintCategory } from '../types';
 import { ComplaintStatus } from '../types';
 import useAuth from './useAuth';
-import { getAddressFromCoordinates, routeComplaintToDepartment, translateText } from '../services/geminiService';
+import { getAddressFromCoordinates, routeComplaintToDepartment, translateText, checkSemanticSimilarity } from '../services/geminiService';
 import useDepartments from './useDepartments';
 import { calculateJaccardSimilarity } from '../lib/similarity';
 // Fix: Import `useLocalization` hook to resolve 'Cannot find name' error.
@@ -77,8 +77,8 @@ export default function useTickets() { // Filename kept for simplicity, logic is
   }, [userProfile, addNotification]);
   
   const addTicket = async (
-    { title, description, category, subcategory, location, attachments }: 
-    { title: string; description: string; category: ComplaintCategory; subcategory?: string; location: { lat: number; lng: number }; attachments: File[] }
+    { title, description, category, subcategory, location, attachments, isAnonymous }: 
+    { title: string; description: string; category: ComplaintCategory; subcategory?: string; location: { lat: number; lng: number }; attachments: File[], isAnonymous: boolean }
   ): Promise<AddTicketResult | null> => {
     if (!userProfile) {
       addNotification("You must be logged in to submit a complaint.");
@@ -115,18 +115,21 @@ export default function useTickets() { // Filename kept for simplicity, logic is
       });
       
       let mostSimilarComplaint: Complaint | null = null;
-      let maxSimilarity = 0;
-      const SIMILARITY_THRESHOLD = 0.7; // 70% similar
+      const JACCARD_THRESHOLD = 0.4; // Lower threshold for initial check
+      const SEMANTIC_THRESHOLD = 0.8; // Confidence from AI
 
       for (const complaint of nearbyComplaints) {
-        const similarity = calculateJaccardSimilarity(description, complaint.description_original);
-        if (similarity > maxSimilarity) {
-          maxSimilarity = similarity;
-          mostSimilarComplaint = complaint;
-        }
+          const jaccardSim = calculateJaccardSimilarity(description, complaint.description_original);
+          if (jaccardSim > JACCARD_THRESHOLD) {
+              const isSimilar = await checkSemanticSimilarity(description, complaint.description_original);
+              if (isSimilar) {
+                  mostSimilarComplaint = complaint;
+                  break; // Found a semantic match, no need to check further
+              }
+          }
       }
 
-      if (mostSimilarComplaint && maxSimilarity >= SIMILARITY_THRESHOLD) {
+      if (mostSimilarComplaint) {
         const parentTicketRef = doc(db, 'complaints', mostSimilarComplaint.id);
 
         await runTransaction(db, async (transaction) => {
@@ -154,6 +157,7 @@ export default function useTickets() { // Filename kept for simplicity, logic is
           upvote_count: 0, parent_ticket_id: mostSimilarComplaint.id,
           escalation_level: 0, escalation_due: mostSimilarComplaint.escalation_due,
           upvotedBy: [],
+          isAnonymous: isAnonymous
         });
 
         return { parentTicketId: mostSimilarComplaint.id, duplicate: true };
@@ -199,6 +203,7 @@ export default function useTickets() { // Filename kept for simplicity, logic is
           department_id: departmentId, upvote_count: 1, parent_ticket_id: null,
           escalation_level: 0, escalation_due: escalationDueDate,
           upvotedBy: [userProfile.uid],
+          isAnonymous: isAnonymous
       };
 
       const docRef = await addDoc(collection(db, 'complaints'), newComplaint);
@@ -257,8 +262,8 @@ export default function useTickets() { // Filename kept for simplicity, logic is
         const lngDelta = 0.01;
 
         const complaintsRef = collection(db, 'complaints');
+        // Simplified query to use automatic single-field index and avoid composite index error.
         const q = query(complaintsRef,
-            where('parent_ticket_id', '==', null),
             where('createdAt', '>=', sevenDaysAgo)
         );
 
@@ -266,7 +271,9 @@ export default function useTickets() { // Filename kept for simplicity, logic is
         const nearbyComplaints: Complaint[] = [];
         querySnapshot.forEach(doc => {
             const data = doc.data() as Complaint;
+            // Filter for original tickets and location client-side
             if (
+                data.parent_ticket_id === null &&
                 data.location &&
                 data.userUid !== userProfile.uid &&
                 Math.abs(data.location.lat - location.lat) <= latDelta &&

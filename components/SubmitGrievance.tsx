@@ -5,9 +5,11 @@ import Spinner from './Spinner';
 import ConfirmationModal from './ConfirmationModal';
 import type { ComplaintCategory, Draft } from '../types';
 import { CATEGORIES, SUBCATEGORIES } from '../constants';
+import { analyzeImageForComplaint } from '../services/geminiService';
+
 
 interface SubmitGrievanceProps {
-  setActiveView: (view: 'submit' | 'tickets' | 'drafts' | 'nearby') => void;
+  setActiveView: (view: 'submit' | 'dashboard' | 'drafts' | 'nearby') => void;
   draftToEdit?: Draft | null;
   clearDraftToEdit: () => void;
 }
@@ -68,6 +70,8 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
   const [submissionResult, setSubmissionResult] = useState<AddTicketResult | null>(null);
   const { t, language } = useLocalization();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   // State and refs for voice input
   const [isRecording, setIsRecording] = useState(false);
@@ -156,12 +160,24 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
     }
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     previews.forEach(URL.revokeObjectURL);
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setAttachments(files);
-      setPreviews(files.map(file => URL.createObjectURL(file as Blob)));
+      // Fix: Argument of type 'unknown' is not assignable to parameter of type 'File'.
+      setPreviews(files.map((file: File) => URL.createObjectURL(file)));
+  
+      if (files.length > 0) {
+        setIsAnalyzing(true);
+        const analysisResult = await analyzeImageForComplaint(files[0]);
+        setIsAnalyzing(false);
+        if (analysisResult) {
+          setTitle(analysisResult.title);
+          setCategory(analysisResult.category);
+          addNotification(t('aiSuggestion'));
+        }
+      }
     }
   };
 
@@ -194,6 +210,7 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
     setPreviews([]);
     setLocation(null);
     setLocationMessage('');
+    setIsAnonymous(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
     clearDraftToEdit();
   };
@@ -201,7 +218,7 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim() && description.trim() && category && location) {
-      const result = await addTicket({ title, description, category, subcategory, location, attachments });
+      const result = await addTicket({ title, description, category, subcategory, location, attachments, isAnonymous });
       if (result) {
         setSubmissionResult(result);
         // if it was a draft, remove it
@@ -242,7 +259,7 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
 
   const handleCloseModal = () => {
     setSubmissionResult(null);
-    setActiveView('tickets');
+    setActiveView('dashboard');
   };
   
   const isFormValid = title.trim() && description.trim() && category && location;
@@ -305,6 +322,7 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="attachments">{t('attachments')}</label>
           <input id="attachments" type="file" accept="image/*" multiple onChange={handleImageChange} ref={fileInputRef} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
         </div>
+        {isAnalyzing && <p className="text-sm text-blue-600 animate-pulse mt-1">{t('analyzingImage')}</p>}
         {previews.length > 0 && (
           <div>
             <p className="text-gray-700 text-sm font-bold mb-2">{t('imagePreview')}</p>
@@ -313,6 +331,17 @@ export default function SubmitGrievance({ setActiveView, draftToEdit, clearDraft
             </div>
           </div>
         )}
+        
+        <div className="flex items-center">
+            <input
+                id="anonymous"
+                type="checkbox"
+                checked={isAnonymous}
+                onChange={(e) => setIsAnonymous(e.target.checked)}
+                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            />
+            <label htmlFor="anonymous" className="ml-2 block text-sm text-gray-900">{t('submitAnonymously')}</label>
+        </div>
 
         {isSubmitting && uploadProgress !== null && (
             <div className="w-full bg-gray-200 rounded-full h-2.5">

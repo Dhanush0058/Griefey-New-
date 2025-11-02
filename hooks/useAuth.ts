@@ -28,14 +28,14 @@ export default function useAuth() {
   const getAuthErrorMessage = useCallback((error: any): string => {
     switch (error.code) {
         // Email/Password
+        case 'auth/invalid-credential':
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+            return t('authError'); // Generic message for all invalid credential errors
         case 'auth/invalid-email':
             return t('authErrorInvalidEmail');
         case 'auth/user-disabled':
             return t('authErrorUserDisabled');
-        case 'auth/user-not-found':
-            return t('authErrorUserNotFound');
-        case 'auth/wrong-password':
-            return t('authErrorWrongPassword');
         case 'auth/email-already-in-use':
             return t('authErrorEmailInUse');
         case 'auth/weak-password':

@@ -13,7 +13,19 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ result, onClose }
   if (!result) return null;
   
   const isDuplicate = result.duplicate;
-  const ticketId = isDuplicate ? result.parentTicketId : result.id;
+  
+  // Fix: Use an if/else statement on the `duplicate` discriminant property to allow
+  // TypeScript to correctly narrow the `AddTicketResult` union type. This ensures
+  // that `parentTicketId` is accessed when `duplicate` is true, and `id` is accessed
+  // when it is false, resolving the type error.
+  let ticketId: string;
+  if (result.duplicate) {
+    // When duplicate is true, the type is { parentTicketId: string; duplicate: true; }
+    ticketId = result.parentTicketId;
+  } else {
+    // When duplicate is false, the type is { id: string; duplicate: false; }
+    ticketId = result.id;
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

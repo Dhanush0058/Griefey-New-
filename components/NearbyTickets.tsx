@@ -15,6 +15,8 @@ const NearbyTickets = () => {
     const { departments } = useDepartments();
     const { t } = useLocalization();
     const { userProfile } = useAuth();
+    const [mapSrc, setMapSrc] = useState('');
+
 
     useEffect(() => {
         let isMounted = true;
@@ -25,6 +27,16 @@ const NearbyTickets = () => {
                         lat: position.coords.latitude,
                         lng: position.coords.longitude,
                     };
+                    
+                    const latDelta = 0.01;
+                    const lngDelta = 0.01;
+                    const bbox = `${location.lng - lngDelta},${location.lat - latDelta},${location.lng + lngDelta},${location.lat + latDelta}`;
+                    const mapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${location.lat},${location.lng}`;
+                    
+                    if (isMounted) {
+                        setMapSrc(mapUrl);
+                    }
+
                     const tickets = await getNearbyTickets(location);
                     if (isMounted) {
                         setNearbyTickets(tickets);
@@ -88,7 +100,23 @@ const NearbyTickets = () => {
 
     return (
         <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">{t('nearby')}</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">{t('nearby')}</h2>
+
+            {mapSrc && (
+                <div className="mb-6 rounded-lg overflow-hidden shadow-md">
+                    <iframe
+                        width="100%"
+                        height="300"
+                        src={mapSrc}
+                        style={{ border: 0 }}
+                        loading="lazy"
+                        aria-hidden="false"
+                        tabIndex={0}
+                        title="Map of nearby complaints"
+                    ></iframe>
+                </div>
+            )}
+            
             {nearbyTickets.length > 0 ? (
                 <div className="space-y-4">
                     {nearbyTickets.map(ticket => (

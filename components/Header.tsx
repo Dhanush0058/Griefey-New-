@@ -2,7 +2,7 @@ import React from 'react';
 import type { User, Language } from '../types';
 import useLocalization from '../hooks/useLocalization';
 
-type View = 'submit' | 'tickets' | 'drafts' | 'nearby';
+type View = 'submit' | 'dashboard' | 'drafts' | 'nearby';
 
 interface HeaderProps {
   user: User;
@@ -22,7 +22,7 @@ export default function Header({ user, onLogout, view, onBack }: HeaderProps) {
     <header className="bg-white shadow-md sticky top-0 z-10">
       <div className="max-w-4xl mx-auto p-4 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-           {view !== 'tickets' && (
+           {view !== 'dashboard' && (
             <button onClick={onBack} aria-label="Go back" className="p-2 rounded-full hover:bg-gray-100 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />

@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Onboarding from './components/Onboarding';
 import Header from './components/Header';
 import SubmitGrievance from './components/SubmitGrievance';
-import MyTickets from './components/MyTickets';
+import Dashboard from './components/Dashboard';
 import Drafts from './components/Drafts';
 import useAuth from './hooks/useAuth';
 import useOnlineStatus from './hooks/useOnlineStatus';
@@ -13,12 +13,12 @@ import useLocalization from './hooks/useLocalization';
 import Chatbot from './components/Chatbot';
 import NearbyTickets from './components/NearbyTickets';
 
-type View = 'submit' | 'tickets' | 'drafts' | 'nearby';
+type View = 'submit' | 'dashboard' | 'drafts' | 'nearby';
 
 function MainApp() {
   const { userProfile, logout } = useAuth();
   const isOnline = useOnlineStatus();
-  const [view, setView] = useState<View>('tickets');
+  const [view, setView] = useState<View>('dashboard');
   const [draftToEdit, setDraftToEdit] = useState<Draft | null>(null);
   const { t } = useLocalization();
   
@@ -34,7 +34,7 @@ function MainApp() {
   };
 
   const handleBack = () => {
-    setView('tickets');
+    setView('dashboard');
   };
 
   return (
@@ -47,7 +47,7 @@ function MainApp() {
       <Header user={userProfile} onLogout={logout} view={view} onBack={handleBack} />
       <main className="flex-grow p-4 pb-20">
         {view === 'submit' && <SubmitGrievance setActiveView={setView} draftToEdit={draftToEdit} clearDraftToEdit={clearDraftToEdit} />}
-        {view === 'tickets' && <MyTickets setView={setView} />}
+        {view === 'dashboard' && <Dashboard setView={setView} />}
         {view === 'drafts' && <Drafts setView={setView} onEditDraft={handleEditDraft} />}
         {view === 'nearby' && <NearbyTickets />}
       </main>
@@ -55,14 +55,14 @@ function MainApp() {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg">
         <div className="flex justify-around max-w-md mx-auto">
           <button
-            onClick={() => setView('tickets')}
-            className={`flex-1 p-3 text-center transition-colors duration-200 ${view === 'tickets' ? 'text-blue-600 border-t-2 border-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
-            aria-current={view === 'tickets'}
+            onClick={() => setView('dashboard')}
+            className={`flex-1 p-3 text-center transition-colors duration-200 ${view === 'dashboard' ? 'text-blue-600 border-t-2 border-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
+            aria-current={view === 'dashboard'}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
             </svg>
-            <span className="text-xs font-medium">{t('myTickets')}</span>
+            <span className="text-xs font-medium">{t('dashboard')}</span>
           </button>
           <button
             onClick={() => setView('nearby')}
@@ -80,7 +80,7 @@ function MainApp() {
             className={`flex-1 p-3 text-center transition-colors duration-200 ${view === 'drafts' ? 'text-blue-600 border-t-2 border-blue-600' : 'text-gray-500 hover:bg-gray-100'}`}
             aria-current={view === 'drafts'}
           >
-            <svg xmlns="http://www.w.org/2000/svg" className="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mx-auto mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             <span className="text-xs font-medium">{t('drafts')}</span>
